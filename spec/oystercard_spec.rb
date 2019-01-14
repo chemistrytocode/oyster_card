@@ -2,7 +2,8 @@ require 'oystercard'
 
 describe Oystercard do
 
-  let(:station) { double :station }
+  let(:entry_station) { double :station }
+  let(:exit_station) { double :station }
 
   describe '#balance' do
 
@@ -29,12 +30,12 @@ describe Oystercard do
 
     it 'should throw if balance is less than minimum journey amount' do
       error = "Insufficient balance to touch in"
-      expect { subject.touch_in(station) }.to raise_error(error)
+      expect { subject.touch_in(entry_station) }.to raise_error(error)
     end
 
     it 'should deduct balance on check_out' do
       subject.top_up(5)
-      expect{ subject.touch_out }.to change { subject.balance }.by (-Oystercard::MINIMUM_FARE)
+      expect{ subject.touch_out(exit_station) }.to change { subject.balance }.by (-Oystercard::MINIMUM_FARE)
     end
   end
 
@@ -43,7 +44,7 @@ describe Oystercard do
 
     it 'should return true if in_use is true' do
       subject.top_up(5)
-      subject.touch_in(station)
+      subject.touch_in(entry_station)
       expect(subject.in_journey?).to eq true
     end
 
@@ -53,14 +54,8 @@ describe Oystercard do
 
     it 'should set in_journey? to true when touch_in is called' do
       subject.top_up(5)
-      subject.touch_in(station)
+      subject.touch_in(entry_station)
       expect(subject).to be_in_journey
-    end
-
-    it 'should record the entry station on check_in' do
-      subject.top_up(5)
-      subject.touch_in(station)
-      expect(subject.entry_station).to eq station
     end
 
   end
@@ -68,15 +63,23 @@ describe Oystercard do
   describe '#touch_out' do
 
     it 'should set in_journey? to false when touch_out is called' do
-      subject.touch_out
+      subject.touch_out(exit_station)
       expect(subject).not_to be_in_journey
     end
 
-    it 'should set entry_station to nil on touch_out' do
+  end
+
+  describe '#Journeys' do
+
+    it 'should initialize journeys as an empty array' do
+      expect(subject.journeys).to be_empty
+    end
+
+    it 'should store the entry & exit station on touches in an hash' do
       subject.top_up(5)
-      subject.touch_in(station)
-      subject.touch_out
-      expect(subject.entry_station).to eq nil
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.journeys[0]).to include(:entry_station => entry_station, :exit_station => exit_station)
     end
 
   end
