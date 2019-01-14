@@ -24,6 +24,25 @@ describe Oystercard do
       subject.deduct(10)
       expect(subject.balance).to eq 10
     end
+  end
+
+  describe '#in_journey?' do
+
+    it 'should set in_journey? to true when touch_in is called' do
+      subject.touch_in
+      expect(subject).to be_in_journey
+    end
+
+    it 'should set in_journey? to false when touch_out is called' do
+      subject.touch_out
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'should return true if in_use is true' do
+      subject.touch_in
+      expect(subject.in_journey?).to eq true
+    end
 
   end
+
 end
