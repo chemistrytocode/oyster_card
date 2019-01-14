@@ -24,11 +24,17 @@ describe Oystercard do
       subject.deduct(10)
       expect(subject.balance).to eq 10
     end
+
+    it 'should throw if balance is less than minimum journey amount' do
+      error = "Insufficient balance to touch in"
+      expect { subject.touch_in }.to raise_error(error)
+    end
   end
 
   describe '#in_journey?' do
 
     it 'should set in_journey? to true when touch_in is called' do
+      subject.top_up(5)
       subject.touch_in
       expect(subject).to be_in_journey
     end
@@ -39,6 +45,7 @@ describe Oystercard do
     end
 
     it 'should return true if in_use is true' do
+      subject.top_up(5)
       subject.touch_in
       expect(subject.in_journey?).to eq true
     end
